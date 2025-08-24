@@ -10,6 +10,9 @@ const String baht = '฿';
 
 //------ 1. register -------------------------------------------------
 Future<void> register() async {
+
+ stdout.writeln('===== Register =====');
+
   stdout.writeln('===== Register =====');
   final username = _readLine('Username: ');
   final password = _readLine('Password: ');
@@ -17,6 +20,21 @@ Future<void> register() async {
     stdout.writeln('Invalid input.\n');
     return;
   }
+
+
+  final uri = Uri.parse('$baseUrl/register');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'username': username, 'password': password}),
+  );
+
+  if (res.statusCode == 200) {
+    stdout.writeln('Register success!\n');
+  } else {
+    stdout.writeln('Register failed: ${res.body}\n');
+  }
+
 
   final uri = Uri.parse('$baseUrl/register');
   final res = await http.post(
@@ -87,6 +105,12 @@ void _printExpenses(List<dynamic> items, {required String header}) {
 
 //------ 3. today ----------------------------------------------------
 Future<void> showTodayExpenses(int userId) async {
+
+   final uri = Uri.parse('$baseUrl/expenses/today/$userId');
+  final res = await http.get(uri);
+
+  if (res.statusCode == 200) {
+
     final uri = Uri.parse('$baseUrl/expenses/today/$userId');
     final res = await http.get(uri);
 
@@ -98,14 +122,24 @@ Future<void> showTodayExpenses(int userId) async {
     } else {
       _printExpenses(data, header: "Today's expenses");
     }
+
+  } else {
+    stdout.writeln('Error: ${res.body}');
+  }
+
     } else {
     stdout.writeln('Error: ${res.body}');
   }
+
 }
 
 //------ 4. all ------------------------------------------------------
 Future<void> showAllExpenses(int userId) async {
+
+   final uri = Uri.parse('$baseUrl/expenses/$userId');
+
   final uri = Uri.parse('$baseUrl/expenses/$userId');
+
   final res = await http.get(uri);
 
   if (res.statusCode == 200) {
@@ -142,22 +176,49 @@ Future<void> searchExpenses(int userId) async {
 
 //------ 7. add ------------------------------------------------------
 Future<void> addExpense(int userId) async {
-  
+  stdout.writeln('===== Add new item =====');
+  final item = _readLine('Item: ');
+  final paid = _readInt('Paid: ');
 
+  if (item.isEmpty || paid == null) {
+    stdout.writeln('Invalid input.\n');
+    return;
+  }
 
+  final uri = Uri.parse('$baseUrl/expenses');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'userId': userId, 'item': item, 'paid': paid}),
+  );
 
-
+  if (res.statusCode == 201 || res.statusCode == 200) {
+    stdout.writeln('Inserted!\n');
+    await showAllExpenses(userId); 
+  } else {
+    stdout.writeln('Insert failed: ${res.body}\n');
+  }
 }
 
-//------ 8. deleted --------------------------------------------------
+//------ 8. deleted -----------------------------------------------
 Future<void> deleteExpense() async {
-  
+  stdout.writeln('===== Delete an item =====');
+  final id = _readInt('Item id: ');
+  if (id == null) {
+    stdout.writeln('Invalid id.\n');
+    return;
+  }
 
+  final uri = Uri.parse('$baseUrl/expenses/$id');
+  final res = await http.delete(uri);
 
-
-
-
-
+  if (res.statusCode == 200) {
+    stdout.writeln('Deleted!\n');
+  } else if (res.statusCode == 404) {
+    stdout.writeln('Not found.\n');
+  } else {
+    stdout.writeln('Delete failed: ${res.body}\n');
+  }
 }
 
 //------ 6. app (menu & loop) ---------------------------------------
