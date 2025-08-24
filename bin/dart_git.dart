@@ -154,9 +154,6 @@ Future<void> searchExpenses(int userId) async {
   } else {
     stdout.writeln('Error: ${res.body}');
   }
-
-
-
 }
 
 //------ 7. add ------------------------------------------------------
@@ -183,11 +180,6 @@ Future<void> addExpense(int userId) async {
   } else {
     stdout.writeln('Insert failed: ${res.body}\n');
   }
-
-
-
-
-
 }
 
 //------ 8. deleted -----------------------------------------------
@@ -209,13 +201,6 @@ Future<void> deleteExpense() async {
   } else {
     stdout.writeln('Delete failed: ${res.body}\n');
   }
-
-
-
-
-
-
-
 }
 
 //------ 6. app (menu & loop) ---------------------------------------
