@@ -9,10 +9,21 @@ app.use(express.urlencoded({ extended: true }));
 
 //--------------- register ----------------
 app.post('/register', (req, res) => {
-  
+   const { username, password } = req.body;
+  if (!username || !password) return res.status(400).send('Missing username or password');
 
+  bcrypt.hash(password, 10, (err, hash) => {
+    if (err) return res.status(500).send('Error hashing password');
 
-
+    const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
+    con.query(sql, [username, hash], (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send('Database insert error');
+      }
+      res.send(`User ${username} registered successfully`);
+    });
+  });
 });
 
 //--------------- login ----------------
