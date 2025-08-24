@@ -36,12 +36,17 @@ app.get('/expenses/search', (req, res) => {
 
 // (2) Today's expenses              <-- วางก่อน
 app.get('/expenses/today/:userId', (req, res) => {
-  
-
-
-
-
-
+  const userId = req.params.userId;
+  const sql = `
+    SELECT id, item, paid, \`date\`
+    FROM expense
+    WHERE user_id = ? AND DATE(\`date\`) = CURDATE()
+    ORDER BY \`date\` ASC, id ASC
+  `;
+  con.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).send('Database error!');
+    res.json(results);
+  });
 });
 
 // (1) All expenses (generic)        <-- วางท้ายสุด
