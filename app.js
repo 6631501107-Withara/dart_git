@@ -28,10 +28,21 @@ app.post('/register', (req, res) => {
 
 //--------------- login ----------------
 app.post('/login', (req, res) => {
-  
+   const { username, password } = req.body;
+  if (!username || !password) return res.status(400).send('Missing username or password');
 
+  const sql = 'SELECT * FROM users WHERE username = ?';
+  con.query(sql, [username], (err, results) => {
+    if (err) return res.status(500).send('Database error');
+    if (results.length === 0) return res.status(401).send('Wrong username');
 
-
+    const user = results[0];
+    bcrypt.compare(password, user.password, (err, same) => {
+      if (err) return res.status(500).send('Password compare error');
+      if (!same) return res.status(401).send('Wrong password');
+      return res.json({ message: 'Login success', userId: user.id });
+    });
+  });
 
 });
 
