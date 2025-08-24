@@ -87,27 +87,57 @@ void _printExpenses(List<dynamic> items, {required String header}) {
 
 //------ 3. today ----------------------------------------------------
 Future<void> showTodayExpenses(int userId) async {
-  
+    final uri = Uri.parse('$baseUrl/expenses/today/$userId');
+    final res = await http.get(uri);
 
-
-
-
+    if (res.statusCode == 200) {
+    final data = jsonDecode(res.body) as List<dynamic>;
+    if (data.isEmpty) {
+      _line("Today's expenses");
+      stdout.writeln('No item.\n');
+    } else {
+      _printExpenses(data, header: "Today's expenses");
+    }
+    } else {
+    stdout.writeln('Error: ${res.body}');
+  }
 }
 
 //------ 4. all ------------------------------------------------------
 Future<void> showAllExpenses(int userId) async {
-  
+  final uri = Uri.parse('$baseUrl/expenses/$userId');
+  final res = await http.get(uri);
 
-
-
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body) as List<dynamic>;
+    if (data.isEmpty) {
+      _line('All expenses');
+      stdout.writeln('No item.\n');
+    } else {
+      _printExpenses(data, header: 'All expenses');
+    }
+  } else {
+    stdout.writeln('Error: ${res.body}');
+  }
 }
 
 //------ 5. search ---------------------------------------------------
 Future<void> searchExpenses(int userId) async {
- 
+  final keyword = _readLine('Item to search: ');
+  final uri = Uri.parse('$baseUrl/expenses/search')
+      .replace(queryParameters: {'userId': userId.toString(), 'q': keyword});
+  final res = await http.get(uri);
 
-
-
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body) as List<dynamic>;
+    if (data.isEmpty) {
+      stdout.writeln('No item: $keyword\n');
+    } else {
+      _printExpenses(data, header: 'Search result');
+    }
+  } else {
+    stdout.writeln('Error: ${res.body}');
+  }
 }
 
 //------ 7. add ------------------------------------------------------
