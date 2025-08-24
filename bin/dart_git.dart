@@ -10,17 +10,45 @@ const String baht = '฿';
 
 //------ 1. register -------------------------------------------------
 Future<void> register() async {
+  stdout.writeln('===== Register =====');
+  final username = _readLine('Username: ');
+  final password = _readLine('Password: ');
+  if (username.isEmpty || password.isEmpty) {
+    stdout.writeln('Invalid input.\n');
+    return;
+  }
 
+  final uri = Uri.parse('$baseUrl/register');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'username': username, 'password': password}),
+  );
 
-
-
+  if (res.statusCode == 200) {
+    stdout.writeln('Register success!\n');
+  } else {
+    stdout.writeln('Register failed: ${res.body}\n');
+  }
  }
 
 //------ 2. login ----------------------------------------------------
 Future<int?> login(String username, String password) async {
-  
+   final uri = Uri.parse('$baseUrl/login');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'username': username, 'password': password}),
+  );
 
-
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body);
+    stdout.writeln(data['message']);
+    return data['userId'];
+  } else {
+    stdout.writeln('Login failed: ${res.body}');
+    return null;
+  }
 
 }
 
