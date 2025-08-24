@@ -10,6 +10,26 @@ const String baht = '฿';
 
 //------ 1. register -------------------------------------------------
 Future<void> register() async {
+ stdout.writeln('===== Register =====');
+  final username = _readLine('Username: ');
+  final password = _readLine('Password: ');
+  if (username.isEmpty || password.isEmpty) {
+    stdout.writeln('Invalid input.\n');
+    return;
+  }
+
+  final uri = Uri.parse('$baseUrl/register');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'username': username, 'password': password}),
+  );
+
+  if (res.statusCode == 200) {
+    stdout.writeln('Register success!\n');
+  } else {
+    stdout.writeln('Register failed: ${res.body}\n');
+  }
 
 
 
@@ -18,7 +38,22 @@ Future<void> register() async {
 
 //------ 2. login ----------------------------------------------------
 Future<int?> login(String username, String password) async {
-  
+   final uri = Uri.parse('$baseUrl/login');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'username': username, 'password': password}),
+  );
+
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body);
+    stdout.writeln(data['message']);
+    return data['userId'];
+  } else {
+    stdout.writeln('Login failed: ${res.body}');
+    return null;
+  }
+
 
 
 
@@ -59,7 +94,21 @@ void _printExpenses(List<dynamic> items, {required String header}) {
 
 //------ 3. today ----------------------------------------------------
 Future<void> showTodayExpenses(int userId) async {
-  
+   final uri = Uri.parse('$baseUrl/expenses/today/$userId');
+  final res = await http.get(uri);
+
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body) as List<dynamic>;
+    if (data.isEmpty) {
+      _line("Today's expenses");
+      stdout.writeln('No item.\n');
+    } else {
+      _printExpenses(data, header: "Today's expenses");
+    }
+  } else {
+    stdout.writeln('Error: ${res.body}');
+  }
+
 
 
 
@@ -68,7 +117,21 @@ Future<void> showTodayExpenses(int userId) async {
 
 //------ 4. all ------------------------------------------------------
 Future<void> showAllExpenses(int userId) async {
-  
+   final uri = Uri.parse('$baseUrl/expenses/$userId');
+  final res = await http.get(uri);
+
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body) as List<dynamic>;
+    if (data.isEmpty) {
+      _line('All expenses');
+      stdout.writeln('No item.\n');
+    } else {
+      _printExpenses(data, header: 'All expenses');
+    }
+  } else {
+    stdout.writeln('Error: ${res.body}');
+  }
+
 
 
 
@@ -76,7 +139,21 @@ Future<void> showAllExpenses(int userId) async {
 
 //------ 5. search ---------------------------------------------------
 Future<void> searchExpenses(int userId) async {
- 
+  final keyword = _readLine('Item to search: ');
+  final uri = Uri.parse('$baseUrl/expenses/search')
+      .replace(queryParameters: {'userId': userId.toString(), 'q': keyword});
+  final res = await http.get(uri);
+
+  if (res.statusCode == 200) {
+    final data = jsonDecode(res.body) as List<dynamic>;
+    if (data.isEmpty) {
+      stdout.writeln('No item: $keyword\n');
+    } else {
+      _printExpenses(data, header: 'Search result');
+    }
+  } else {
+    stdout.writeln('Error: ${res.body}');
+  }
 
 
 
@@ -84,7 +161,29 @@ Future<void> searchExpenses(int userId) async {
 
 //------ 7. add ------------------------------------------------------
 Future<void> addExpense(int userId) async {
-  
+  stdout.writeln('===== Add new item =====');
+  final item = _readLine('Item: ');
+  final paid = _readInt('Paid: ');
+
+  if (item.isEmpty || paid == null) {
+    stdout.writeln('Invalid input.\n');
+    return;
+  }
+
+  final uri = Uri.parse('$baseUrl/expenses');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'userId': userId, 'item': item, 'paid': paid}),
+  );
+
+  if (res.statusCode == 201 || res.statusCode == 200) {
+    stdout.writeln('Inserted!\n');
+    await showAllExpenses(userId); // แสดงรายการล่าสุดทันที
+  } else {
+    stdout.writeln('Insert failed: ${res.body}\n');
+  }
+
 
 
 
@@ -93,7 +192,24 @@ Future<void> addExpense(int userId) async {
 
 //------ 8. deleted --------------------------------------------------
 Future<void> deleteExpense() async {
-  
+  stdout.writeln('===== Delete an item =====');
+  final id = _readInt('Item id: ');
+  if (id == null) {
+    stdout.writeln('Invalid id.\n');
+    return;
+  }
+
+  final uri = Uri.parse('$baseUrl/expenses/$id');
+  final res = await http.delete(uri);
+
+  if (res.statusCode == 200) {
+    stdout.writeln('Deleted!\n');
+  } else if (res.statusCode == 404) {
+    stdout.writeln('Not found.\n');
+  } else {
+    stdout.writeln('Delete failed: ${res.body}\n');
+  }
+
 
 
 
