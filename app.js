@@ -82,13 +82,17 @@ app.get('/expenses/today/:userId', (req, res) => {
 
 // (1) All expenses (generic)        <-- วางท้ายสุด
 app.get('/expenses/:userId', (req, res) => {
-  
-
-
-
-
-
-
+  const userId = req.params.userId;
+  const sql = `
+    SELECT id, item, paid, \`date\`
+    FROM expense
+    WHERE user_id = ?
+    ORDER BY \`date\` ASC, id ASC
+  `;
+  con.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).send('Database error!');
+    res.json(results);
+  });
 });
 
 
