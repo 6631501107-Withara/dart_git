@@ -179,7 +179,7 @@ Future<void> addExpense(int userId) async {
 
   if (res.statusCode == 201 || res.statusCode == 200) {
     stdout.writeln('Inserted!\n');
-    await showAllExpenses(userId); // แสดงรายการล่าสุดทันที
+    await showAllExpenses(userId); 
   } else {
     stdout.writeln('Insert failed: ${res.body}\n');
   }
