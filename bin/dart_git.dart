@@ -190,7 +190,7 @@ Future<void> addExpense(int userId) async {
 
 }
 
-//------ 8. deleted --------------------------------------------------
+//------ 8. deleted -----------------------------------------------
 Future<void> deleteExpense() async {
   stdout.writeln('===== Delete an item =====');
   final id = _readInt('Item id: ');
