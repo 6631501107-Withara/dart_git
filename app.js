@@ -24,9 +24,6 @@ app.post('/register', (req, res) => {
       res.send(`User ${username} registered successfully`);
     });
   });
-
-
-
 });
 
 //--------------- login ----------------
@@ -46,11 +43,6 @@ app.post('/login', (req, res) => {
       return res.json({ message: 'Login success', userId: user.id });
     });
   });
-
-
-
-
-
 });
 
 // (3) Search expenses by keyword  <-- วางก่อน
@@ -58,6 +50,8 @@ app.get('/expenses/search', (req, res) => {
   const { userId, q } = req.query;
   if (!userId) return res.status(400).send('Missing userId');
   if (!q || q.trim() === '') return res.json([]);
+    if (!userId) return res.status(400).send('Missing userId');
+    if (!q || q.trim() === '') return res.json([]);
 
   const keyword = `%${q}%`;
   const sql = `
@@ -71,16 +65,11 @@ app.get('/expenses/search', (req, res) => {
     res.json(results);
   });
 
-
-
-
-
-
-});
-
 // (2) Today's expenses              <-- วางก่อน
 app.get('/expenses/today/:userId', (req, res) => {
+
    const userId = req.params.userId;
+  const userId = req.params.userId;
   const sql = `
     SELECT id, item, paid, \`date\`
     FROM expense
@@ -91,16 +80,13 @@ app.get('/expenses/today/:userId', (req, res) => {
     if (err) return res.status(500).send('Database error!');
     res.json(results);
   });
-
-
-
-
-
 });
 
 // (1) All expenses (generic)        <-- วางท้ายสุด
 app.get('/expenses/:userId', (req, res) => {
+
    const userId = req.params.userId;
+  const userId = req.params.userId;
   const sql = `
     SELECT id, item, paid, \`date\`
     FROM expense
@@ -111,13 +97,6 @@ app.get('/expenses/:userId', (req, res) => {
     if (err) return res.status(500).send('Database error!');
     res.json(results);
   });
-
-
-
-
-
-
-
 });
 
 

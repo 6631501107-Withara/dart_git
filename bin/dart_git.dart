@@ -10,13 +10,17 @@ const String baht = '฿';
 
 //------ 1. register -------------------------------------------------
 Future<void> register() async {
+
  stdout.writeln('===== Register =====');
+
+  stdout.writeln('===== Register =====');
   final username = _readLine('Username: ');
   final password = _readLine('Password: ');
   if (username.isEmpty || password.isEmpty) {
     stdout.writeln('Invalid input.\n');
     return;
   }
+
 
   final uri = Uri.parse('$baseUrl/register');
   final res = await http.post(
@@ -32,8 +36,18 @@ Future<void> register() async {
   }
 
 
+  final uri = Uri.parse('$baseUrl/register');
+  final res = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'username': username, 'password': password}),
+  );
 
-
+  if (res.statusCode == 200) {
+    stdout.writeln('Register success!\n');
+  } else {
+    stdout.writeln('Register failed: ${res.body}\n');
+  }
  }
 
 //------ 2. login ----------------------------------------------------
@@ -53,9 +67,6 @@ Future<int?> login(String username, String password) async {
     stdout.writeln('Login failed: ${res.body}');
     return null;
   }
-
-
-
 
 }
 
@@ -94,10 +105,16 @@ void _printExpenses(List<dynamic> items, {required String header}) {
 
 //------ 3. today ----------------------------------------------------
 Future<void> showTodayExpenses(int userId) async {
+
    final uri = Uri.parse('$baseUrl/expenses/today/$userId');
   final res = await http.get(uri);
 
   if (res.statusCode == 200) {
+
+    final uri = Uri.parse('$baseUrl/expenses/today/$userId');
+    final res = await http.get(uri);
+
+    if (res.statusCode == 200) {
     final data = jsonDecode(res.body) as List<dynamic>;
     if (data.isEmpty) {
       _line("Today's expenses");
@@ -105,19 +122,24 @@ Future<void> showTodayExpenses(int userId) async {
     } else {
       _printExpenses(data, header: "Today's expenses");
     }
+
   } else {
     stdout.writeln('Error: ${res.body}');
   }
 
-
-
-
+    } else {
+    stdout.writeln('Error: ${res.body}');
+  }
 
 }
 
 //------ 4. all ------------------------------------------------------
 Future<void> showAllExpenses(int userId) async {
+
    final uri = Uri.parse('$baseUrl/expenses/$userId');
+
+  final uri = Uri.parse('$baseUrl/expenses/$userId');
+
   final res = await http.get(uri);
 
   if (res.statusCode == 200) {
@@ -131,10 +153,6 @@ Future<void> showAllExpenses(int userId) async {
   } else {
     stdout.writeln('Error: ${res.body}');
   }
-
-
-
-
 }
 
 //------ 5. search ---------------------------------------------------
