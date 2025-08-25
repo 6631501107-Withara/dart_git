@@ -7,24 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
-//--------------- register ----------------
-app.post('/register', (req, res) => {
-   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).send('Missing username or password');
 
-  bcrypt.hash(password, 10, (err, hash) => {
-    if (err) return res.status(500).send('Error hashing password');
-
-    const sql = 'INSERT INTO users (username, password) VALUES (?, ?)';
-    con.query(sql, [username, hash], (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Database insert error');
-      }
-      res.send(`User ${username} registered successfully`);
-    });
-  });
-});
 
 //--------------- login ----------------
 app.post('/login', (req, res) => {
@@ -50,9 +33,7 @@ app.get('/expenses/search', (req, res) => {
   const { userId, q } = req.query;
   if (!userId) return res.status(400).send('Missing userId');
   if (!q || q.trim() === '') return res.json([]);
-    if (!userId) return res.status(400).send('Missing userId');
-    if (!q || q.trim() === '') return res.json([]);
-
+  
   const keyword = `%${q}%`;
   const sql = `
     SELECT id, item, paid, \`date\`
@@ -60,16 +41,17 @@ app.get('/expenses/search', (req, res) => {
     WHERE user_id = ? AND LOWER(item) LIKE LOWER(?)
     ORDER BY \`date\` ASC, id ASC
   `;
+ 
   con.query(sql, [userId, keyword], (err, results) => {
     if (err) return res.status(500).send('Database error!');
     res.json(results);
   });
+   });
 
 // (2) Today's expenses              <-- วางก่อน
 app.get('/expenses/today/:userId', (req, res) => {
 
    const userId = req.params.userId;
-  const userId = req.params.userId;
   const sql = `
     SELECT id, item, paid, \`date\`
     FROM expense
@@ -86,7 +68,6 @@ app.get('/expenses/today/:userId', (req, res) => {
 app.get('/expenses/:userId', (req, res) => {
 
    const userId = req.params.userId;
-  const userId = req.params.userId;
   const sql = `
     SELECT id, item, paid, \`date\`
     FROM expense
@@ -119,13 +100,6 @@ app.post('/expenses', (req, res) => {
     if (err) return res.status(500).send('Database insert error');
     res.status(201).json({ message: 'Inserted', id: result.insertId });
   });
-
-
-
-
-
-
-
 });
 
 
@@ -138,12 +112,6 @@ app.delete('/expenses/:id', (req, res) => {
     if (result.affectedRows === 0) return res.status(404).send('Expense not found');
     res.json({ message: 'Deleted' });
   });
-
-
-
-
-
-
 });
 
 app.listen(3000, () => {
